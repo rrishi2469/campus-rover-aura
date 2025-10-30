@@ -42,6 +42,7 @@ All colors MUST be HSL.
     --gradient-hero: linear-gradient(135deg, hsl(215 85% 35%) 0%, hsl(195 75% 50%) 50%, hsl(280 65% 60%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(215 90% 40%) 0%, hsl(195 80% 55%) 100%);
     --gradient-accent: linear-gradient(120deg, hsl(195 75% 50%) 0%, hsl(280 65% 60%) 100%);
+    --gradient-subtle: linear-gradient(145deg, hsl(210 100% 98%) 0%, hsl(220 100% 99%) 100%);
     
     --glow-blue: 0 20px 60px hsl(215 85% 35% / 0.3);
     --glow-cyan: 0 20px 60px hsl(195 75% 50% / 0.3);
@@ -162,5 +163,17 @@ All colors MUST be HSL.
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+  
+  .glass-card {
+    background: linear-gradient(145deg, hsl(0 0% 100% / 0.9) 0%, hsl(210 100% 99% / 0.85) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(210 100% 95%);
+    box-shadow: 0 8px 32px hsl(215 85% 35% / 0.1), 
+                0 0 0 1px hsl(205 100% 65% / 0.05);
   }
 }
