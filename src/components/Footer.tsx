@@ -20,7 +20,7 @@ const Footer = () => {
           </div>
           
           <p className="text-muted-foreground text-sm">
-            © 2025 Campus Rover. All rights reserved.
+            © 2025 CampusRover. All rights reserved.
           </p>
         </div>
       </div>
