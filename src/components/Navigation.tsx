@@ -18,7 +18,11 @@ const Navigation = () => {
           </a>
         </div>
         
-        <Button variant="default" className="gradient-card hover:opacity-90 transition-opacity">
+        <Button 
+          variant="default" 
+          className="gradient-card hover:opacity-90 transition-opacity"
+          onClick={() => window.location.href = '/auth'}
+        >
           Get Started
         </Button>
       </div>
