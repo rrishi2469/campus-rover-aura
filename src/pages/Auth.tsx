@@ -6,13 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCircle, Lock, Mail } from "lucide-react";
-
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<string>("");
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Store role in localStorage for now (simulation)
@@ -21,21 +19,21 @@ const Auth = () => {
       navigate("/");
     }
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+  return <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       {/* Animated Background Auras */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] animate-float" />
-        <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] animate-float" style={{
+        animationDelay: "1s"
+      }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[120px] animate-pulse" style={{
+        animationDelay: "2s"
+      }} />
       </div>
 
       <Card className="w-full max-w-md relative z-10 glass-card animate-fade-in">
         <CardHeader className="space-y-3 pb-6">
-          <div className="mx-auto w-16 h-16 rounded-full gradient-card flex items-center justify-center shadow-lg">
-            <UserCircle className="w-8 h-8 text-white" />
-          </div>
+          
           <CardTitle className="text-3xl font-bold text-center text-gradient">
             Welcome to Campus Rover
           </CardTitle>
@@ -73,15 +71,7 @@ const Auth = () => {
                 <Mail className="w-4 h-4 text-primary" />
                 Email
               </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@campus.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12"
-              />
+              <Input id="email" type="email" placeholder="your.email@campus.edu" value={email} onChange={e => setEmail(e.target.value)} required className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12" />
             </div>
 
             <div className="space-y-2">
@@ -89,15 +79,7 @@ const Auth = () => {
                 <Lock className="w-4 h-4 text-primary" />
                 Password
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12"
-              />
+              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12" />
             </div>
 
             <Button type="submit" className="w-full gradient-card hover:opacity-90 transition-all h-12 text-base font-semibold shadow-lg hover:shadow-xl">
@@ -112,8 +94,6 @@ const Auth = () => {
           </form>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
