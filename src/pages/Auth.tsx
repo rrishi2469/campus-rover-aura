@@ -34,9 +34,7 @@ const Auth = () => {
       <Card className="w-full max-w-md relative z-10 glass-card animate-fade-in">
         <CardHeader className="space-y-3 pb-6">
           
-          <CardTitle className="text-3xl font-bold text-center text-gradient">
-            Welcome to Campus Rover
-          </CardTitle>
+          <CardTitle className="text-3xl font-bold text-center text-gradient">Welcome to CampusRover</CardTitle>
           <CardDescription className="text-center text-muted-foreground text-base">
             Select your role and login to continue
           </CardDescription>
