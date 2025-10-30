@@ -1,10 +1,9 @@
 const Footer = () => {
-  return (
-    <footer id="contact" className="py-12 px-6 bg-card border-t border-border">
+  return <footer id="contact" className="py-12 px-6 bg-card border-t border-border">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex items-center">
-            <span className="text-lg font-bold text-foreground">Campus Rover</span>
+            <span className="text-lg font-bold text-foreground">CampusRover</span>
           </div>
           
           <div className="flex space-x-8">
@@ -24,8 +23,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
