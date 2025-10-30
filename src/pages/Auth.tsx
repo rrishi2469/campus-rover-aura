@@ -80,9 +80,7 @@ const Auth = () => {
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12" />
             </div>
 
-            <Button type="submit" className="w-full gradient-card hover:opacity-90 transition-all h-12 text-base font-semibold shadow-lg hover:shadow-xl">
-              Login to Campus Rover
-            </Button>
+            <Button type="submit" className="w-full gradient-card hover:opacity-90 transition-all h-12 text-base font-semibold shadow-lg hover:shadow-xl">Login to CampusRover</Button>
 
             <div className="text-center pt-2">
               <a href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
