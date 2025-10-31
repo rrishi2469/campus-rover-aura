@@ -27,6 +27,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 className="gradient-card text-white hover:opacity-90 transition-opacity glow-blue px-8 py-6 text-lg font-semibold"
+                onClick={() => window.location.href = '/dashboard'}
               >
                 Try Demo
               </Button>
