@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { BookingDialog } from "@/components/BookingDialog";
+
 const Dashboard = () => {
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const timeSlots = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
 
@@ -85,7 +89,11 @@ const Dashboard = () => {
             </p>
           </div>
           
-          <Button size="lg" className="gradient-card text-white hover:opacity-90 transition-opacity glow-blue font-semibold">
+          <Button 
+            size="lg" 
+            className="gradient-card text-white hover:opacity-90 transition-opacity glow-blue font-semibold"
+            onClick={() => setBookingDialogOpen(true)}
+          >
             <Plus className="w-5 h-5 mr-2" />
             Book Your Classroom
           </Button>
@@ -145,7 +153,10 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        
+        <BookingDialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen} />
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Dashboard;
