@@ -119,7 +119,7 @@ const Dashboard = () => {
               {/* Time Slots Grid */}
               <div className="space-y-2">
                 {timeSlots.map((time, timeIndex) => <div key={time} className="grid grid-cols-6 gap-4">
-                    <div className="text-sm font-medium text-muted-foreground py-3">
+                    <div className="text-sm font-medium text-muted-foreground py-3 font-helvetica">
                       {time}
                     </div>
                     {days.map((day, dayIndex) => {
@@ -128,7 +128,7 @@ const Dashboard = () => {
                             rounded-lg border-2 p-3 min-h-[60px] transition-all
                             ${bookedSlot ? `${getBookingColor(bookedSlot.type)} border-2` : "border-border/50 hover:border-primary/30 hover:bg-muted/30 cursor-pointer"}
                           `}>
-                          {bookedSlot && <div className="text-sm font-semibold">
+                          {bookedSlot && <div className="text-sm font-semibold font-helvetica">
                               {bookedSlot.room}
                             </div>}
                         </div>;

@@ -91,10 +91,10 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
             <div className="glass-card p-4 rounded-xl space-y-3">
               <div className="flex items-center gap-3 text-foreground">
                 <Building2 className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Classroom</p>
-                  <p className="font-semibold">{classroom}</p>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Classroom</p>
+                <p className="font-semibold font-helvetica">{classroom}</p>
+              </div>
               </div>
               
               <div className="flex items-center gap-3 text-foreground">
@@ -107,18 +107,18 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               
               <div className="flex items-center gap-3 text-foreground">
                 <Clock className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
-                  <p className="font-semibold">{time}</p>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Time</p>
+                <p className="font-semibold font-helvetica">{time}</p>
+              </div>
               </div>
               
               <div className="flex items-center gap-3 text-foreground">
                 <Users className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Attendees</p>
-                  <p className="font-semibold">{attendees}</p>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Attendees</p>
+                <p className="font-semibold font-helvetica">{attendees}</p>
+              </div>
               </div>
               
               <div className="flex items-center gap-3 text-foreground">
@@ -176,7 +176,7 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               placeholder="Enter number of attendees"
               value={attendees}
               onChange={(e) => setAttendees(e.target.value)}
-              className="border-border focus:border-primary"
+              className="border-border focus:border-primary font-helvetica"
               min="1"
             />
           </div>
@@ -217,7 +217,7 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               </SelectTrigger>
               <SelectContent>
                 {building && classroomsByBuilding[building]?.map((room) => (
-                  <SelectItem key={room} value={room}>
+                  <SelectItem key={room} value={room} className="font-helvetica">
                     {room}
                   </SelectItem>
                 ))}
@@ -257,7 +257,7 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               </SelectTrigger>
               <SelectContent>
                 {timeSlots.map((t) => (
-                  <SelectItem key={t} value={t}>
+                  <SelectItem key={t} value={t} className="font-helvetica">
                     {t}
                   </SelectItem>
                 ))}
