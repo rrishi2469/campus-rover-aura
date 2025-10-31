@@ -78,7 +78,7 @@ const Dashboard = () => {
         <div className="flex justify-between items-start mb-12 animate-fade-in">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              Hi, <span className="text-gradient text-[#272727]">Rishi</span>!
+              Hi, <span className="text-[#272727]">Rishi</span>!
             </h1>
             <p className="text-xl text-muted-foreground">
               Welcome to your CampusRover dashboard
