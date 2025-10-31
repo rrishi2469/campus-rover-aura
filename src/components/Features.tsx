@@ -11,7 +11,7 @@ const features = [
   {
     icon: Calendar,
     title: "Smart Availability Checker",
-    subtitle: "Automate rilems",
+    subtitle: "Quickly check the availability of desired classrooms",
     gradient: "from-cyan-500 to-teal-500",
   },
   {
