@@ -70,7 +70,8 @@ const Dashboard = () => {
   const getBookedSlot = (dayIndex: number, timeIndex: number) => {
     return bookedSlots.find(slot => slot.day === dayIndex && slot.time === timeIndex);
   };
-  return <div className="min-h-screen bg-background relative overflow-hidden">
+  return (
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Aura glow effects */}
       <div className="absolute top-20 right-20 w-96 h-96 bg-primary-glow/10 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-pulse" style={{
