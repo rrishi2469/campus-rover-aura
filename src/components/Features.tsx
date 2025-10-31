@@ -23,7 +23,7 @@ const features = [
   {
     icon: Monitor,
     title: "Real-time Dashboard",
-    subtitle: "Simp les trainsol",
+    subtitle: "smooth allotment functioning",
     gradient: "from-purple-500 to-pink-500",
   },
 ];
