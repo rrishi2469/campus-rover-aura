@@ -17,13 +17,13 @@ const features = [
   {
     icon: Bell,
     title: "Automated Waitlist Alerts",
-    subtitle: "Conreacioners",
+    subtitle: "Smooth Allotment Functioning",
     gradient: "from-teal-500 to-green-500",
   },
   {
     icon: Monitor,
     title: "Real-time Dashboard",
-    subtitle: "smooth allotment functioning",
+    subtitle: "Have a Personalised Dashboard",
     gradient: "from-purple-500 to-pink-500",
   },
 ];
