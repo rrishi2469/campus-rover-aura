@@ -1,10 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { BookingDialog } from "@/components/BookingDialog";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from "@supabase/supabase-js";
 
 const Dashboard = () => {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [username, setUsername] = useState<string>("Guest");
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch user profile when user changes
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setUsername(data.username);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const timeSlots = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
 
@@ -83,7 +134,7 @@ const Dashboard = () => {
         <div className="flex justify-between items-start mb-12 animate-fade-in">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              Hi, <span className="text-[#272727]">Rishi</span>!
+              Hi, <span className="text-[#272727]">{username}</span>!
             </h1>
             <p className="text-xl text-muted-foreground">
               Welcome to your CampusRover dashboard
