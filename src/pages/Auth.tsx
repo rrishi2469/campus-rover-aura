@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import SignUpDialog from "@/components/SignUpDialog";
 import type { Session, User } from "@supabase/supabase-js";
+import { loginSchema } from "@/lib/validations/auth";
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -19,6 +20,7 @@ const Auth = () => {
   const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Set up auth state listener
@@ -49,11 +51,27 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
 
-    if (!role) {
+    // Validate form data
+    const validationResult = loginSchema.safeParse({
+      email,
+      password,
+      role,
+    });
+
+    if (!validationResult.success) {
+      const fieldErrors: Record<string, string> = {};
+      validationResult.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      
       toast({
-        title: "Error",
-        description: "Please select a role",
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
         variant: "destructive",
       });
       return;
@@ -63,8 +81,8 @@ const Auth = () => {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
       });
 
       if (error) throw error;
@@ -77,7 +95,7 @@ const Auth = () => {
           .eq("user_id", data.user.id)
           .single();
 
-        if (userRoles && userRoles.role === role) {
+        if (userRoles && userRoles.role === validationResult.data.role) {
           toast({
             title: "Login Successful!",
             description: "Redirecting to dashboard...",
@@ -155,6 +173,9 @@ const Auth = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
+              {errors.role && (
+                <p className="text-sm text-destructive">{errors.role}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -163,6 +184,9 @@ const Auth = () => {
                 Email
               </Label>
               <Input id="email" type="email" placeholder="your.email@campus.edu" value={email} onChange={e => setEmail(e.target.value)} required className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12" />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -171,6 +195,9 @@ const Auth = () => {
                 Password
               </Label>
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-12" />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password}</p>
+              )}
             </div>
 
             <Button 

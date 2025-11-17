@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserCircle, Lock, Mail, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { signupSchema } from "@/lib/validations/auth";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -20,23 +21,33 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
 
-    if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
+    // Validate form data
+    const validationResult = signupSchema.safeParse({
+      username,
+      email,
+      password,
+      confirmPassword,
+      role,
+    });
+
+    if (!validationResult.success) {
+      const fieldErrors: Record<string, string> = {};
+      validationResult.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message;
+        }
       });
-      return;
-    }
-
-    if (!role) {
+      setErrors(fieldErrors);
+      
       toast({
-        title: "Error",
-        description: "Please select a role",
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
         variant: "destructive",
       });
       return;
@@ -48,12 +59,12 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
       const redirectUrl = `${window.location.origin}/auth`;
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            username,
+            username: validationResult.data.username,
           },
         },
       });
@@ -66,14 +77,14 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
           .from("user_roles")
           .insert([{
             user_id: signUpData.user.id,
-            role: role as "student" | "teacher" | "club",
+            role: validationResult.data.role as "student" | "teacher" | "club",
           }]);
 
         if (roleError) throw roleError;
 
         toast({
           title: "Registration Successful!",
-          description: `Welcome ${username}! You can now log in.`,
+          description: `Welcome ${validationResult.data.username}! You can now log in.`,
           className: "bg-primary text-primary-foreground",
         });
 
@@ -83,6 +94,7 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
         setPassword("");
         setConfirmPassword("");
         setRole("");
+        setErrors({});
         onOpenChange(false);
       }
     } catch (error: any) {
@@ -122,6 +134,9 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
               required
               className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-11"
             />
+            {errors.username && (
+              <p className="text-sm text-destructive">{errors.username}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -145,6 +160,9 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
                 </SelectItem>
               </SelectContent>
             </Select>
+            {errors.role && (
+              <p className="text-sm text-destructive">{errors.role}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -161,6 +179,9 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
               required
               className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-11"
             />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -177,6 +198,9 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
               required
               className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-11"
             />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -193,6 +217,9 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
               required
               className="bg-background/50 border-border/50 hover:border-primary/50 focus:border-primary transition-colors h-11"
             />
+            {errors.confirmPassword && (
+              <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+            )}
           </div>
 
           <Button

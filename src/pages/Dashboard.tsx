@@ -49,7 +49,9 @@ const Dashboard = () => {
       if (error) throw error;
 
       if (data) {
-        setUsername(data.username);
+        // Sanitize username to prevent XSS
+        const sanitizedUsername = data.username.replace(/[<>]/g, '');
+        setUsername(sanitizedUsername);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
