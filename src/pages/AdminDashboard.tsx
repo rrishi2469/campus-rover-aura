@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, LogOut, Users, CheckCircle, Clock, Building2, Check, X } from "lucide-react";
+import { 
+  Plus, 
+  LogOut, 
+  Users, 
+  CheckCircle, 
+  Clock, 
+  Building2, 
+  Check, 
+  X,
+  LayoutDashboard,
+  Calendar,
+  Settings,
+  HelpCircle
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
 import AddClassroomModal from "@/components/AddClassroomModal";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface BookingRequest {
@@ -35,6 +47,7 @@ const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [addClassroomOpen, setAddClassroomOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"requests" | "classrooms">("requests");
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([
     {
       id: "1",
@@ -210,7 +223,6 @@ const AdminDashboard = () => {
     toast({
       title: "Request Approved",
       description: "Booking request has been approved successfully",
-      className: "bg-green-500 text-white",
     });
   };
 
@@ -232,222 +244,282 @@ const AdminDashboard = () => {
     toast({
       title: "Classroom Added",
       description: `${classroom.name} has been added successfully`,
-      className: "bg-green-500 text-white",
     });
   };
 
+  const sidebarItems = [
+    { icon: LayoutDashboard, label: "Dashboard", active: true },
+    { icon: Calendar, label: "Bookings", active: false },
+    { icon: Building2, label: "Classrooms", active: false },
+    { icon: Settings, label: "Settings", active: false },
+    { icon: HelpCircle, label: "Help", active: false },
+  ];
+
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Aura glow effects */}
-      <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }}></div>
-
-      {/* Header */}
-      <header className="gradient-card border-b border-primary/20 relative z-10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gradient">CampusBook Admin</h1>
-                <p className="text-xs text-muted-foreground hidden md:block">Administrative Dashboard</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setAddClassroomOpen(true)}
-                className="gradient-card hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                <span className="hidden md:inline">Add Classroom</span>
-              </Button>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="border-primary/20 hover:bg-primary/10"
-              >
-                <LogOut className="w-4 h-4 md:mr-2" />
-                <span className="hidden md:inline">Logout</span>
-              </Button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-card border-r border-border flex-shrink-0 hidden lg:flex flex-col">
+        <div className="p-6 border-b border-border">
+          <span className="text-xl font-bold text-foreground">CampusRover</span>
         </div>
-      </header>
-
-      <div className="container mx-auto px-6 py-8 relative z-10">
-        {/* Welcome Section */}
-        <div className="mb-8 animate-fade-in">
-          <h2 className="text-3xl font-bold text-gradient mb-2">Welcome, Admin!</h2>
-          <p className="text-muted-foreground">Manage classroom bookings and requests efficiently</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
-          <Card className="gradient-card border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Pending Requests</p>
-                  <p className="text-3xl font-bold text-orange-500">{bookingRequests.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-orange-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Classrooms</p>
-                  <p className="text-3xl font-bold text-primary">{classrooms.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Approved Today</p>
-                  <p className="text-3xl font-bold text-green-500">{approvedToday}</p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pending Booking Requests */}
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-2xl font-bold text-foreground">Pending Booking Requests</h3>
-            {bookingRequests.length > 0 && (
-              <Badge className="bg-orange-500 text-white">{bookingRequests.length}</Badge>
-            )}
-          </div>
-
-          {bookingRequests.length === 0 ? (
-            <Card className="gradient-card border-primary/20">
-              <CardContent className="p-8 text-center">
-                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <p className="text-muted-foreground">No pending requests at the moment</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {bookingRequests.map((request) => (
-                <Card
-                  key={request.id}
-                  className="gradient-card border-primary/20 hover:shadow-lg transition-all"
+        
+        <nav className="flex-1 p-4">
+          <ul className="space-y-1">
+            {sidebarItems.map((item, index) => (
+              <li key={index}>
+                <button
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    item.active 
+                      ? "bg-primary/10 text-primary" 
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <h4 className="text-xl font-bold text-foreground mb-1">{request.classroom}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Requested by <span className="font-semibold text-foreground">{request.requester}</span> ({request.role})
-                          </p>
-                        </div>
+                  <item.icon className="w-5 h-5" />
+                  {item.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-                        <div className="flex flex-wrap gap-4 text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Building2 className="w-4 h-4 text-primary" />
-                            <span>{request.building}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Clock className="w-4 h-4 text-primary" />
-                            <span>{request.date} • {request.timeStart} - {request.timeEnd}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Users className="w-4 h-4 text-primary" />
-                            <span>{request.attendance} attendees</span>
-                          </div>
-                        </div>
+        <div className="p-4 border-t border-border">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            Sign out
+          </button>
+        </div>
+      </aside>
 
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            <span className="font-semibold text-foreground">Purpose:</span> {request.purpose}
-                          </p>
-                        </div>
-                      </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        {/* Top Bar */}
+        <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between lg:justify-end">
+          <span className="text-xl font-bold text-foreground lg:hidden">CampusRover</span>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => setAddClassroomOpen(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Classroom
+            </Button>
+            <button
+              onClick={handleLogout}
+              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            >
+              <LogOut className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
+        </header>
 
-                      <div className="flex md:flex-col gap-2 md:min-w-[120px]">
-                        <Button
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="flex-1 bg-green-500 hover:bg-green-600 text-white"
-                        >
-                          <Check className="w-4 h-4 mr-2" />
-                          Accept
-                        </Button>
-                        <Button
-                          onClick={() => handleDeclineRequest(request.id)}
-                          variant="outline"
-                          className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                        >
-                          <X className="w-4 h-4 mr-2" />
-                          Decline
-                        </Button>
-                      </div>
+        <div className="p-6 lg:p-8">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              Hi, Admin!
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome to your dashboard.
+            </p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
+            <div className="bg-card border border-border rounded-xl p-6">
+              <p className="text-sm text-muted-foreground mb-2">Pending Requests</p>
+              <p className="text-3xl font-bold text-foreground">{bookingRequests.length}</p>
+              <div className="mt-4 space-y-2">
+                {bookingRequests.slice(0, 2).map((req) => (
+                  <div key={req.id} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate">{req.classroom} - {req.requester}</span>
+                    <span className="text-amber-600 font-medium ml-2">Pending</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <p className="text-sm text-muted-foreground mb-2">Total Classrooms</p>
+              <p className="text-3xl font-bold text-foreground">{classrooms.length}</p>
+              <div className="mt-4 space-y-2">
+                {classrooms.slice(0, 2).map((room) => (
+                  <div key={room.id} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate">{room.name} - {room.building}</span>
+                    <span className="text-primary font-medium ml-2">{room.capacity} seats</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <p className="text-sm text-muted-foreground mb-2">Approved Today</p>
+              <p className="text-3xl font-bold text-foreground">{approvedToday}</p>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Morning sessions</span>
+                  <span className="text-emerald-600 font-medium">7 approved</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Afternoon sessions</span>
+                  <span className="text-emerald-600 font-medium">5 approved</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-2 mb-6 border-b border-border">
+            <button
+              onClick={() => setActiveTab("requests")}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "requests"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              Pending Requests
+              {bookingRequests.length > 0 && (
+                <span className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {bookingRequests.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("classrooms")}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "classrooms"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              All Classrooms
+            </button>
+          </div>
+
+          {/* Content Area */}
+          {activeTab === "requests" && (
+            <div className="space-y-3">
+              {bookingRequests.length === 0 ? (
+                <div className="bg-card border border-border rounded-xl p-12 text-center">
+                  <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                  <p className="text-muted-foreground">No pending requests at the moment</p>
+                </div>
+              ) : (
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                          Classroom
+                        </th>
+                        <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden md:table-cell">
+                          Requester
+                        </th>
+                        <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden lg:table-cell">
+                          Date & Time
+                        </th>
+                        <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden xl:table-cell">
+                          Purpose
+                        </th>
+                        <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {bookingRequests.map((request) => (
+                        <tr key={request.id} className="hover:bg-muted/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="font-medium text-foreground">{request.classroom}</p>
+                              <p className="text-sm text-muted-foreground">{request.building}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 hidden md:table-cell">
+                            <div>
+                              <p className="font-medium text-foreground">{request.requester}</p>
+                              <p className="text-sm text-muted-foreground">{request.role}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 hidden lg:table-cell">
+                            <div>
+                              <p className="font-medium text-foreground">{request.date}</p>
+                              <p className="text-sm text-muted-foreground">{request.timeStart} - {request.timeEnd}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 hidden xl:table-cell">
+                            <div>
+                              <p className="text-foreground truncate max-w-[200px]">{request.purpose}</p>
+                              <p className="text-sm text-muted-foreground">{request.attendance} attendees</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                onClick={() => handleAcceptRequest(request.id)}
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                              >
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeclineRequest(request.id)}
+                                size="sm"
+                                variant="outline"
+                                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "classrooms" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {classrooms.map((classroom) => (
+                <div
+                  key={classroom.id}
+                  className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-foreground">{classroom.name}</h4>
+                      <p className="text-sm text-muted-foreground">{classroom.building}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm font-medium">{classroom.capacity}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {classroom.amenities.map((amenity, index) => (
+                      <span
+                        key={index}
+                        className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-md"
+                      >
+                        {amenity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </div>
-
-        {/* All Classrooms */}
-        <div className="animate-fade-in">
-          <h3 className="text-2xl font-bold text-foreground mb-4">All Classrooms</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {classrooms.map((classroom) => (
-              <Card
-                key={classroom.id}
-                className="gradient-card border-primary/20 hover:shadow-lg transition-all"
-              >
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-lg font-bold text-foreground mb-1">{classroom.name}</h4>
-                      <p className="text-sm text-muted-foreground">{classroom.building}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4 text-primary" />
-                      <span>Capacity: {classroom.capacity}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {classroom.amenities.map((amenity, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs bg-primary/10 text-primary border-primary/20"
-                        >
-                          {amenity}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
+      </main>
 
       <AddClassroomModal
         open={addClassroomOpen}
