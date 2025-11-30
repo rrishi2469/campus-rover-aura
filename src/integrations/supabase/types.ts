@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          attendees: number
+          booking_type: string
+          building: string
+          classroom_id: string
+          classroom_name: string
+          created_at: string
+          day: string
+          id: string
+          status: string
+          time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendees?: number
+          booking_type: string
+          building: string
+          classroom_id: string
+          classroom_name: string
+          created_at?: string
+          day: string
+          id?: string
+          status?: string
+          time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendees?: number
+          booking_type?: string
+          building?: string
+          classroom_id?: string
+          classroom_name?: string
+          created_at?: string
+          day?: string
+          id?: string
+          status?: string
+          time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classrooms: {
+        Row: {
+          amenities: string[] | null
+          building: string
+          capacity: number
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          building: string
+          capacity?: number
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          building?: string
+          capacity?: number
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
