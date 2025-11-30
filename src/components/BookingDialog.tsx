@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,19 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Clock, Users, Building2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import { useClassrooms, createBooking } from "@/hooks/useBookings";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const classroomsByBuilding: Record<string, string[]> = {
-  A: ["A101", "A102", "A103", "A104", "A105"],
-  B: ["B201", "B202", "B203", "B204", "B205"],
-  C: ["C301", "C302", "C303", "C304", "C305"],
-  D: ["D401", "D402", "D403", "D404", "D405"],
-  Auditorium: ["Main Auditorium", "Mini Auditorium", "Seminar Hall 1", "Seminar Hall 2", "Conference Room"]
-};
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -37,14 +31,20 @@ const bookingTypes = [
 export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
   const [attendees, setAttendees] = useState("");
   const [building, setBuilding] = useState("");
-  const [classroom, setClassroom] = useState("");
+  const [classroomId, setClassroomId] = useState("");
   const [day, setDay] = useState("");
   const [time, setTime] = useState("");
   const [bookingType, setBookingType] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { classrooms, classroomsByBuilding, loading } = useClassrooms();
+
+  const selectedClassroom = classrooms.find(c => c.id === classroomId);
+  const buildingOptions = Object.keys(classroomsByBuilding);
 
   const handleSubmit = () => {
-    if (!attendees || !building || !classroom || !day || !time || !bookingType) {
+    if (!attendees || !building || !classroomId || !day || !time || !bookingType) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -52,26 +52,60 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
     setShowConfirmation(true);
   };
 
-  const handleConfirmBooking = () => {
-    toast.success("Classroom Requested!", {
-      description: `${classroom} has been requested for ${day} at ${time}`,
-      duration: 4000,
-    });
+  const handleConfirmBooking = async () => {
+    setIsSubmitting(true);
     
-    // Reset form
-    setAttendees("");
-    setBuilding("");
-    setClassroom("");
-    setDay("");
-    setTime("");
-    setBookingType("");
-    setShowConfirmation(false);
-    onOpenChange(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Please log in to book a classroom");
+        return;
+      }
+
+      if (!selectedClassroom) {
+        toast.error("Please select a classroom");
+        return;
+      }
+
+      await createBooking(
+        user.id,
+        classroomId,
+        selectedClassroom.name,
+        selectedClassroom.building,
+        day,
+        time,
+        bookingType,
+        parseInt(attendees)
+      );
+
+      toast.success("Classroom Requested!", {
+        description: `${selectedClassroom.name} has been requested for ${day} at ${time}. Waiting for admin approval.`,
+        duration: 4000,
+      });
+      
+      // Reset form
+      setAttendees("");
+      setBuilding("");
+      setClassroomId("");
+      setDay("");
+      setTime("");
+      setBookingType("");
+      setShowConfirmation(false);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error creating booking:", error);
+      toast.error("Failed to create booking", {
+        description: error.message || "Please try again later"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBuildingChange = (value: string) => {
     setBuilding(value);
-    setClassroom(""); // Reset classroom when building changes
+    setClassroomId(""); // Reset classroom when building changes
   };
 
   if (showConfirmation) {
@@ -93,7 +127,8 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
                 <Building2 className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Classroom</p>
-                <p className="font-semibold font-helvetica">{classroom}</p>
+                <p className="font-semibold font-helvetica">{selectedClassroom?.name}</p>
+                <p className="text-xs text-muted-foreground">{selectedClassroom?.building}</p>
               </div>
               </div>
               
@@ -135,14 +170,16 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
                 variant="outline"
                 onClick={() => setShowConfirmation(false)}
                 className="flex-1"
+                disabled={isSubmitting}
               >
                 Back
               </Button>
               <Button
                 onClick={handleConfirmBooking}
                 className="flex-1 gradient-card text-white hover:opacity-90"
+                disabled={isSubmitting}
               >
-                Request Classroom
+                {isSubmitting ? "Submitting..." : "Request Classroom"}
               </Button>
             </div>
           </div>
@@ -187,16 +224,16 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               <Building2 className="w-4 h-4 text-primary" />
               Building Selection
             </Label>
-            <Select value={building} onValueChange={handleBuildingChange}>
+            <Select value={building} onValueChange={handleBuildingChange} disabled={loading}>
               <SelectTrigger className="border-border focus:border-primary">
-                <SelectValue placeholder="Select a building" />
+                <SelectValue placeholder={loading ? "Loading..." : "Select a building"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="A">Building A</SelectItem>
-                <SelectItem value="B">Building B</SelectItem>
-                <SelectItem value="C">Building C</SelectItem>
-                <SelectItem value="D">Building D</SelectItem>
-                <SelectItem value="Auditorium">Auditorium</SelectItem>
+                {buildingOptions.map((b) => (
+                  <SelectItem key={b} value={b}>
+                    {b === "Auditorium" ? "Auditorium" : `Building ${b}`}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -208,17 +245,17 @@ export function BookingDialog({ open, onOpenChange }: BookingDialogProps) {
               Classroom Selection
             </Label>
             <Select 
-              value={classroom} 
-              onValueChange={setClassroom}
-              disabled={!building}
+              value={classroomId} 
+              onValueChange={setClassroomId}
+              disabled={!building || loading}
             >
               <SelectTrigger className="border-border focus:border-primary disabled:opacity-50">
                 <SelectValue placeholder={building ? "Select a classroom" : "Please select a building first"} />
               </SelectTrigger>
               <SelectContent>
                 {building && classroomsByBuilding[building]?.map((room) => (
-                  <SelectItem key={room} value={room} className="font-helvetica">
-                    {room}
+                  <SelectItem key={room.id} value={room.id} className="font-helvetica">
+                    {room.name} (Capacity: {room.capacity})
                   </SelectItem>
                 ))}
               </SelectContent>
