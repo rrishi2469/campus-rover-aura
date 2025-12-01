@@ -12,13 +12,21 @@ import {
   LayoutDashboard,
   Calendar,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Filter
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
 import AddClassroomModal from "@/components/AddClassroomModal";
 import { useClassrooms, updateBookingStatus, type Booking } from "@/hooks/useBookings";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -28,6 +36,9 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<"requests" | "classrooms" | "calendar">("requests");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [filterBuilding, setFilterBuilding] = useState<string>("all");
+  const [filterDay, setFilterDay] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
 
   const { classrooms, loading: classroomsLoading } = useClassrooms();
 
@@ -190,6 +201,13 @@ const AdminDashboard = () => {
       });
     }
   };
+
+  // Filter pending requests based on selected filters
+  const filteredPendingRequests = bookings
+    .filter(b => b.status === "pending")
+    .filter(b => filterBuilding === "all" || b.building === filterBuilding)
+    .filter(b => filterDay === "all" || b.day === filterDay)
+    .filter(b => filterType === "all" || b.booking_type === filterType);
 
   const pendingRequests = bookings.filter(b => b.status === "pending");
   const approvedBookings = bookings.filter(b => b.status === "approved");
@@ -384,15 +402,92 @@ const AdminDashboard = () => {
 
           {/* Content Area */}
           {activeTab === "requests" && (
-            <div className="space-y-3">
+            <div className="space-y-6">
+              {/* Filter Controls */}
+              <div className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold text-foreground">Filters</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Building</label>
+                    <Select value={filterBuilding} onValueChange={setFilterBuilding}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Buildings" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Buildings</SelectItem>
+                        <SelectItem value="Building A">Building A</SelectItem>
+                        <SelectItem value="Building B">Building B</SelectItem>
+                        <SelectItem value="Building C">Building C</SelectItem>
+                        <SelectItem value="Building D">Building D</SelectItem>
+                        <SelectItem value="Auditorium">Auditorium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Day</label>
+                    <Select value={filterDay} onValueChange={setFilterDay}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Days" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Days</SelectItem>
+                        <SelectItem value="Monday">Monday</SelectItem>
+                        <SelectItem value="Tuesday">Tuesday</SelectItem>
+                        <SelectItem value="Wednesday">Wednesday</SelectItem>
+                        <SelectItem value="Thursday">Thursday</SelectItem>
+                        <SelectItem value="Friday">Friday</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Booking Type</label>
+                    <Select value={filterType} onValueChange={setFilterType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="lecture">Lecture</SelectItem>
+                        <SelectItem value="club">Club Activity</SelectItem>
+                        <SelectItem value="event">Event</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {(filterBuilding !== "all" || filterDay !== "all" || filterType !== "all") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFilterBuilding("all");
+                      setFilterDay("all");
+                      setFilterType("all");
+                    }}
+                    className="mt-4"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+
               {bookingsLoading ? (
                 <div className="bg-card border border-border rounded-xl p-12 text-center">
                   <p className="text-muted-foreground">Loading requests...</p>
                 </div>
-              ) : pendingRequests.length === 0 ? (
+              ) : filteredPendingRequests.length === 0 ? (
                 <div className="bg-card border border-border rounded-xl p-12 text-center">
                   <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-                  <p className="text-muted-foreground">No pending requests at the moment</p>
+                  <p className="text-muted-foreground">
+                    {pendingRequests.length === 0 
+                      ? "No pending requests at the moment"
+                      : "No requests match the selected filters"}
+                  </p>
                 </div>
               ) : (
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -417,7 +512,7 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {pendingRequests.map((request) => (
+                      {filteredPendingRequests.map((request) => (
                         <tr key={request.id} className="hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4">
                             <div>
