@@ -28,21 +28,23 @@ export interface Classroom {
 }
 
 export function useBookings(user: User | null) {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [approvedBookings, setApprovedBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      setBookings([]);
+      setUserBookings([]);
+      setApprovedBookings([]);
       setLoading(false);
       return;
     }
 
-    fetchBookings();
+    fetchAllBookings();
 
-    // Set up real-time subscription
+    // Set up real-time subscription for all booking changes
     const channel = supabase
-      .channel('bookings-changes')
+      .channel('bookings-realtime')
       .on(
         'postgres_changes',
         {
@@ -52,7 +54,7 @@ export function useBookings(user: User | null) {
         },
         (payload) => {
           console.log('Booking change:', payload);
-          fetchBookings();
+          fetchAllBookings();
         }
       )
       .subscribe();
@@ -62,15 +64,29 @@ export function useBookings(user: User | null) {
     };
   }, [user]);
 
-  const fetchBookings = async () => {
+  const fetchAllBookings = async () => {
+    if (!user) return;
+    
     try {
-      const { data, error } = await supabase
+      // Fetch user's own bookings
+      const { data: userBookingsData, error: userError } = await supabase
         .from("bookings")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setBookings(data || []);
+      if (userError) throw userError;
+      setUserBookings(userBookingsData || []);
+
+      // Fetch all approved bookings for the calendar
+      const { data: approvedData, error: approvedError } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false });
+
+      if (approvedError) throw approvedError;
+      setApprovedBookings(approvedData || []);
     } catch (error) {
       console.error("Error fetching bookings:", error);
     } finally {
@@ -78,7 +94,12 @@ export function useBookings(user: User | null) {
     }
   };
 
-  return { bookings, loading, refetch: fetchBookings };
+  return { 
+    userBookings, 
+    approvedBookings, 
+    loading, 
+    refetch: fetchAllBookings 
+  };
 }
 
 export function useClassrooms() {
