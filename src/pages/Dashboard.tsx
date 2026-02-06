@@ -1,16 +1,23 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { BookingDialog } from "@/components/BookingDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useBookings } from "@/hooks/useBookings";
 import type { User, Session } from "@supabase/supabase-js";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState<string>("Guest");
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   const { bookings, loading: bookingsLoading } = useBookings(user);
 
@@ -106,14 +113,26 @@ const Dashboard = () => {
             </p>
           </div>
           
-          <Button 
-            size="lg" 
-            className="gradient-card text-white hover:opacity-90 transition-opacity glow-blue font-semibold"
-            onClick={() => setBookingDialogOpen(true)}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Book Your Classroom
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="bg-white/20 backdrop-blur-xl border border-white/30 text-foreground hover:bg-white/30 hover:border-white/50 transition-all duration-300 shadow-lg shadow-primary/5 rounded-xl"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+            
+            <Button 
+              size="lg" 
+              className="gradient-card text-white hover:opacity-90 transition-opacity glow-blue font-semibold"
+              onClick={() => setBookingDialogOpen(true)}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Book Your Classroom
+            </Button>
+          </div>
         </div>
 
         {/* Weekly Calendar */}
