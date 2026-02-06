@@ -11,6 +11,8 @@ import { toast } from "@/hooks/use-toast";
 import SignUpDialog from "@/components/SignUpDialog";
 import type { Session, User } from "@supabase/supabase-js";
 import { loginSchema } from "@/lib/validations/auth";
+import { getSafeAuthErrorMessage } from "@/lib/auth-errors";
+
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -111,10 +113,11 @@ const Auth = () => {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Login error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to login",
+        description: getSafeAuthErrorMessage(error),
         variant: "destructive",
       });
     } finally {

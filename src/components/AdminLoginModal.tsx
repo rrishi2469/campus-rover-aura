@@ -7,6 +7,7 @@ import { Mail, Lock, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { getSafeAuthErrorMessage } from "@/lib/auth-errors";
 
 interface AdminLoginModalProps {
   open: boolean;
@@ -66,10 +67,11 @@ const AdminLoginModal = ({ open, onOpenChange }: AdminLoginModalProps) => {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Admin login error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to login",
+        description: getSafeAuthErrorMessage(error),
         variant: "destructive",
       });
     } finally {

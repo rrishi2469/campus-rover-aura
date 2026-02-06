@@ -8,6 +8,7 @@ import { UserCircle, Lock, Mail, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { signupSchema } from "@/lib/validations/auth";
+import { getSafeAuthErrorMessage } from "@/lib/auth-errors";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -97,10 +98,11 @@ const SignUpDialog = ({ open, onOpenChange }: SignUpDialogProps) => {
         setErrors({});
         onOpenChange(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Sign up error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to sign up",
+        description: getSafeAuthErrorMessage(error),
         variant: "destructive",
       });
     } finally {
