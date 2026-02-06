@@ -149,6 +149,11 @@ export async function createBooking(
   bookingType: string,
   attendees: number
 ) {
+  // Server-side validation for attendees
+  if (!Number.isInteger(attendees) || attendees < 1 || attendees > 10000) {
+    throw new Error('Attendees must be between 1 and 10000');
+  }
+
   const { data, error } = await supabase
     .from("bookings")
     .insert({
