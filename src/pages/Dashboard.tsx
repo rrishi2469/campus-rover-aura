@@ -19,7 +19,7 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const { bookings, loading: bookingsLoading } = useBookings(user);
+  const { userBookings, approvedBookings, loading: bookingsLoading } = useBookings(user);
 
   useEffect(() => {
     // Set up auth state listener
@@ -71,8 +71,7 @@ const Dashboard = () => {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const timeSlots = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
 
-  // Convert database bookings to slot format
-  const approvedBookings = bookings.filter(b => b.status === "approved");
+  // Use approvedBookings for calendar display
   
   const getBookingColor = (type: string) => {
     switch (type) {
@@ -209,11 +208,11 @@ const Dashboard = () => {
         </div>
 
         {/* My Bookings Section */}
-        {bookings.length > 0 && (
+        {userBookings.length > 0 && (
           <div className="glass-card rounded-2xl p-8 mt-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <h2 className="text-2xl font-bold text-foreground mb-6">My Booking Requests</h2>
             <div className="space-y-3">
-              {bookings.map((booking) => (
+              {userBookings.map((booking) => (
                 <div 
                   key={booking.id} 
                   className="flex items-center justify-between p-4 rounded-lg bg-card border border-border"
