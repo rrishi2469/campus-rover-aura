@@ -97,7 +97,14 @@ const Auth = () => {
           .eq("user_id", data.user.id)
           .single();
 
-        if (userRoles && userRoles.role === validationResult.data.role) {
+        if (userRoles?.role === "admin") {
+          toast({
+            title: "Admin Login Successful!",
+            description: "Redirecting to admin dashboard...",
+            className: "bg-primary text-primary-foreground",
+          });
+          navigate("/admin");
+        } else if (userRoles && userRoles.role === validationResult.data.role) {
           toast({
             title: "Login Successful!",
             description: "Redirecting to dashboard...",

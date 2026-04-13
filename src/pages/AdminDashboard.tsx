@@ -42,6 +42,8 @@ const AdminDashboard = () => {
 
   const { classrooms, loading: classroomsLoading } = useClassrooms();
 
+  const [requesterInfo, setRequesterInfo] = useState<Record<string, { username: string; role: string }>>({});
+
   // Fetch all bookings for admin
   const fetchAllBookings = async () => {
     try {
@@ -52,6 +54,32 @@ const AdminDashboard = () => {
 
       if (error) throw error;
       setBookings(data || []);
+
+      // Fetch requester info for all unique user_ids
+      if (data && data.length > 0) {
+        const uniqueUserIds = [...new Set(data.map(b => b.user_id))];
+        
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, email")
+          .in("id", uniqueUserIds);
+
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", uniqueUserIds);
+
+        const infoMap: Record<string, { username: string; role: string }> = {};
+        uniqueUserIds.forEach(uid => {
+          const profile = profiles?.find(p => p.id === uid);
+          const userRole = roles?.find(r => r.user_id === uid);
+          infoMap[uid] = {
+            username: profile?.username || profile?.email || "Unknown",
+            role: userRole?.role || "unknown",
+          };
+        });
+        setRequesterInfo(infoMap);
+      }
     } catch (error) {
       console.error("Error fetching bookings:", error);
     } finally {
