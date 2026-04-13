@@ -42,6 +42,8 @@ const AdminDashboard = () => {
 
   const { classrooms, loading: classroomsLoading } = useClassrooms();
 
+  const [requesterInfo, setRequesterInfo] = useState<Record<string, { username: string; role: string }>>({});
+
   // Fetch all bookings for admin
   const fetchAllBookings = async () => {
     try {
@@ -52,6 +54,32 @@ const AdminDashboard = () => {
 
       if (error) throw error;
       setBookings(data || []);
+
+      // Fetch requester info for all unique user_ids
+      if (data && data.length > 0) {
+        const uniqueUserIds = [...new Set(data.map(b => b.user_id))];
+        
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, email")
+          .in("id", uniqueUserIds);
+
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", uniqueUserIds);
+
+        const infoMap: Record<string, { username: string; role: string }> = {};
+        uniqueUserIds.forEach(uid => {
+          const profile = profiles?.find(p => p.id === uid);
+          const userRole = roles?.find(r => r.user_id === uid);
+          infoMap[uid] = {
+            username: profile?.username || profile?.email || "Unknown",
+            role: userRole?.role || "unknown",
+          };
+        });
+        setRequesterInfo(infoMap);
+      }
     } catch (error) {
       console.error("Error fetching bookings:", error);
     } finally {
@@ -495,6 +523,9 @@ const AdminDashboard = () => {
                     <thead className="bg-muted/50">
                       <tr>
                         <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                          Requester
+                        </th>
+                        <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
                           Classroom
                         </th>
                         <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden lg:table-cell">
@@ -512,47 +543,56 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {filteredPendingRequests.map((request) => (
-                        <tr key={request.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-6 py-4">
-                            <div>
-                              <p className="font-medium text-foreground">{request.classroom_name}</p>
-                              <p className="text-sm text-muted-foreground">{request.building}</p>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 hidden lg:table-cell">
-                            <div>
-                              <p className="font-medium text-foreground">{request.day}</p>
-                              <p className="text-sm text-muted-foreground">{request.time}</p>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 hidden md:table-cell">
-                            <p className="text-foreground capitalize">{request.booking_type}</p>
-                          </td>
-                          <td className="px-6 py-4 hidden xl:table-cell">
-                            <p className="text-foreground">{request.attendees}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                onClick={() => handleAcceptRequest(request.id)}
-                                size="sm"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDeclineRequest(request.id)}
-                                size="sm"
-                                variant="outline"
-                                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredPendingRequests.map((request) => {
+                        const info = requesterInfo[request.user_id];
+                        return (
+                          <tr key={request.id} className="hover:bg-muted/30 transition-colors">
+                            <td className="px-6 py-4">
+                              <div>
+                                <p className="font-medium text-foreground">{info?.username || "Unknown"}</p>
+                                <p className="text-sm text-muted-foreground capitalize">{info?.role || "—"}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div>
+                                <p className="font-medium text-foreground">{request.classroom_name}</p>
+                                <p className="text-sm text-muted-foreground">{request.building}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 hidden lg:table-cell">
+                              <div>
+                                <p className="font-medium text-foreground">{request.day}</p>
+                                <p className="text-sm text-muted-foreground">{request.time}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 hidden md:table-cell">
+                              <p className="text-foreground capitalize">{request.booking_type}</p>
+                            </td>
+                            <td className="px-6 py-4 hidden xl:table-cell">
+                              <p className="text-foreground">{request.attendees}</p>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  onClick={() => handleAcceptRequest(request.id)}
+                                  size="sm"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeclineRequest(request.id)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
